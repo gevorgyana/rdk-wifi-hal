@@ -10216,18 +10216,35 @@ static int nl80211_send_frame_cmd(wifi_interface_info_t *interface, unsigned int
 
     wpa_printf(MSG_MSGDUMP, "nl80211: CMD_FRAME freq=%u no_ack=%d \n", freq, no_ack);
     wpa_hexdump(MSG_MSGDUMP, "CMD_FRAME", buf, buf_len);
-
-    if (!(msg = nl80211_drv_cmd_msg(g_wifi_hal.nl80211_id, interface, 0, NL80211_CMD_FRAME)) ||
-        (freq && nla_put_u32(msg, NL80211_ATTR_WIPHY_FREQ, freq)) ||
-	    (wait && nla_put_u32(msg, NL80211_ATTR_DURATION, wait)) ||
-	    (offchanok && nla_put_flag(msg, NL80211_ATTR_OFFCHANNEL_TX_OK)) ||
-        (no_ack && nla_put_flag(msg, NL80211_ATTR_DONT_WAIT_FOR_ACK)) ||
-        (csa_offs && nla_put(msg, NL80211_ATTR_CSA_C_OFFSETS_TX,
-                             csa_offs_len * sizeof(u16), csa_offs)) ||
-        nla_put(msg, NL80211_ATTR_FRAME, buf_len, buf)) {
-        goto fail;
+    if (!(msg = nl80211_drv_cmd_msg(g_wifi_hal.nl80211_id, interface, 0, NL80211_CMD_FRAME))) {
+      goto fail;
     }
-
+    wpa_printf(MSG_MSGDUMP, "1\n");
+    if ((freq && nla_put_u32(msg, NL80211_ATTR_WIPHY_FREQ, freq))) {
+      goto fail;
+    }
+    wpa_printf(MSG_MSGDUMP, "2\n");
+    if ((wait && nla_put_u32(msg, NL80211_ATTR_DURATION, wait))) {
+      goto fail;
+    }
+    wpa_printf(MSG_MSGDUMP, "3\n");
+    if ((offchanok && nla_put_flag(msg, NL80211_ATTR_OFFCHANNEL_TX_OK))) {
+      goto fail;
+    }
+    wpa_printf(MSG_MSGDUMP, "4\n");
+    if ((no_ack && nla_put_flag(msg, NL80211_ATTR_DONT_WAIT_FOR_ACK))) {
+      goto fail;
+    }
+    wpa_printf(MSG_MSGDUMP, "5\n");
+    if ((csa_offs && nla_put(msg, NL80211_ATTR_CSA_C_OFFSETS_TX,
+                             csa_offs_len * sizeof(u16), csa_offs))) {
+      goto fail;
+    }
+    wpa_printf(MSG_MSGDUMP, "6\n");
+    if (nla_put(msg, NL80211_ATTR_FRAME, buf_len, buf)) {
+      goto fail;
+    }
+    wpa_printf(MSG_MSGDUMP, "7\n");
     cookie = 0;
     ret = nl80211_send_and_recv(msg, cookie_handler, &cookie, NULL, NULL);
     msg = NULL;
